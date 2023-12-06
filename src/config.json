@@ -1,0 +1,12 @@
+{
+    "binance" : {
+        "API-key" : "",
+        "API-secret" : ""
+    },
+    "discord" : {
+        "token" : "MTAyMTM0MjYyNzg3MTg1NDU5Mg.Gbbp30.vghqLd4GnBD2oIKmZMBvBgXBpt1ru6isU-fslw"
+    },
+    "wallets" : {
+        
+    }
+}
