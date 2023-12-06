@@ -14,7 +14,4 @@ class Connector:
 connector = Connector()
 
 async def terminate() -> None:
-    if not connector.discord_bot:
-        print("IF")
-        #await connector.discord_bot.close()
-        await connector.discord_connection
+    sys.exit(0)
