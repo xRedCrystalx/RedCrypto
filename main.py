@@ -33,13 +33,13 @@ class Main:
             
         # actual starting..
         print(f"""{self.c.Red}
-____ ____ ___  ____ ____ _   _ ___  ___ ____ 
-|__/ |___ |  \\ |    |__/  \\_/  |__]  |  |  | 
-|  \\ |___ |__/ |___ |  \\   |   |     |  |__| 
+____ ____ ___    ____ ____ _   _ ___  ___ ____ 
+|__/ |___ |  \\   |    |__/  \\_/  |__]  |  |  | 
+|  \\ |___ |__/   |___ |  \\   |   |     |  |__| 
 {self.c.R}""")
         
-        connector.discord_connection: asyncio.Future = self.loop.run_in_executor(None, DiscordHandler().start)
-        print("TEST")
+        # starting discord bot in async thread so it doesn't block the main function of the program
+        self.loop.run_in_executor(None, DiscordHandler().start)
         
         
 if __name__ == "__main__":
