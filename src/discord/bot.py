@@ -19,23 +19,18 @@ class MyBot(commands.AutoShardedBot):
             windows: str = f"{cogPath}/**/*.py"
             linux: str = f"*/{cogPath}/**/*.py"
 
-            for cog in (cogList := glob.glob(windows, recursive=True)):
+            for cog in glob.glob(windows, recursive=True):
                 try:
                     await self.load_extension(cog.replace("\\", ".").replace("/", ".").removesuffix(".py"))
                     counter += 1
                 except Exception as error:
-                    print(f"{connector.colors.Red}Failed to load {cog}: {type(error).__name__}; {error}{connector.colors.R}")
-            
-            print(f"{connector.colors.Cyan}i{connector.colors.R} Successfully loaded {connector.colors.Cyan}{counter}/{len(cogList)}{connector.colors.R} extensions.")
-        
-        print(f"{connector.colors.Gray}------------------------------------------------------------------------{connector.colors.R}")
+                    print(f"DISCORD >> {connector.colors.Red}Failed to load {cog}: {type(error).__name__}; {error}{connector.colors.R}")
 
         #Syncing Attempts   
         try:
             await self.tree.sync()
-            print("Successfully global synced")
         except Exception as error:
-            print(f"{connector.colors.Red}Failed to globally sync bot. {type(error).__name__}: {error}{connector.colors.R}")
+            print(f"DISCORD >> {connector.colors.Red}Failed to globally sync bot. {type(error).__name__}: {error}{connector.colors.R}")
 
     #Closing aiohttp session
     async def close(self) -> None:
@@ -44,7 +39,7 @@ class MyBot(commands.AutoShardedBot):
 
     #Connect to discord
     async def on_ready(self) -> None:
-        print(f"{connector.colors.Magenta}{self.user} has connected to Discord!{connector.colors.R}")
+        print(f"DISCORD >> {connector.colors.Magenta}{self.user} has connected to Discord!{connector.colors.R}")
         await self.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name="Binance"))
 
 connector: con.Connector = con.connector
@@ -53,7 +48,7 @@ class DiscordHandler:
     def start(self) -> None:
         try:
             bot = MyBot()
-            bot.run(token=connector.config["discord"]["token"], reconnect=True, log_handler=None)
+            bot.run(token=connector.config["discord"]["token"], reconnect=True, log_handler=None)#
             
         except Exception as e:
             print(e)
