@@ -4,7 +4,6 @@ from discord import app_commands
 from discord.ext import commands
 import src.connector as con
 
-
 class Shutdown(commands.Cog):
     def __init__(self) -> None:
         self.connector: con.Connector = con.connector
