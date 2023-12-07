@@ -1,8 +1,9 @@
-import sys, ccxt, asyncio, os, json, threading
+import sys, asyncio, os, json
 sys.dont_write_bytecode = True
 from src.system.colors import auto_color_handler, C, CNone
 import src.connector as con
 from src.discord.bot import DiscordHandler
+from src.crypto.main import CryptoMain
 
 class Main:
     def __init__(self) -> None:
@@ -40,6 +41,9 @@ ____ ____ ___    ____ ____ _   _ ___  ___ ____
         
         # starting discord bot in async thread so it doesn't block the main function of the program
         self.loop.run_in_executor(None, DiscordHandler().start)
+        
+        # starting connection with binance / ccxt in async thread
+        self.loop.run_in_executor(None, CryptoMain().start)
         
         
 if __name__ == "__main__":
