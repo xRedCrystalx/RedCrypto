@@ -16,10 +16,10 @@ class Main:
     # save everything to connector class
     async def save(self) -> None:
         try:
-            connector.config = self.config
-            connector.colors = self.c
-            connector.path = self.path
-            connector.loop = self.loop
+            shared.config = self.config
+            shared.colors = self.c
+            shared.path = self.path
+            shared.loop = self.loop
         except Exception:
             return False
         return True
@@ -48,5 +48,5 @@ ____ ____ ___    ____ ____ _   _ ___  ___ ____
         
         
 if __name__ == "__main__":
-    connector: con.Connector = con.connector
+    shared: con.SharedResource = con.shared
     asyncio.run(Main().main())
