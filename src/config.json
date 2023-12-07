@@ -1,12 +1,24 @@
 {
+    "general" : {
+        "sandbox" : false,
+        "symbol" : "BTC/EUR",
+        "selenium" : {
+            "url" : "https://www.binance.com/en/trade/BTC_EUR?type=spot",
+            "XPATH" : "/html/body/div[3]/div[4]/div/div[6]/div/div[1]/div[1]/div/div[2]/div[1]",
+
+            "webdriver" : "chrome",
+            "path" : "C:\\Users\\domen\\Documents\\RedCrypto\\test\\chromedriver.exe",
+            "arguments" : ["--headless"]
+        }
+    },
     "binance" : {
         "API-key" : "",
         "API-secret" : ""
     },
     "discord" : {
+        "switch" : true,
+        "guild_id" : 938804743122346074,
+        "administrators" : [382213226181558272, 333588605748510721],
         "token" : "MTAyMTM0MjYyNzg3MTg1NDU5Mg.Gbbp30.vghqLd4GnBD2oIKmZMBvBgXBpt1ru6isU-fslw"
-    },
-    "wallets" : {
-        
     }
 }
