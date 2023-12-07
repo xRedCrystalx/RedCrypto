@@ -40,7 +40,8 @@ ____ ____ ___    ____ ____ _   _ ___  ___ ____
 {self.c.R}""")
         
         # starting discord bot in async thread so it doesn't block the main function of the program
-        self.loop.run_in_executor(None, DiscordHandler().start)
+        if self.config["discord"]["switch"]:
+            self.loop.run_in_executor(None, DiscordHandler().start)
         
         # starting connection with binance / ccxt in async thread
         self.loop.run_in_executor(None, CryptoMain().start)
