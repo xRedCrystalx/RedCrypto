@@ -6,7 +6,7 @@ import src.connector as con
 
 class Buy(commands.Cog):
     def __init__(self) -> None:
-        self.connector: con.Connector = con.connector
+        self.shared: con.SharedResource = con.shared
 
     @app_commands.command(name="buy")
     async def buy(self, interaction: discord.Interaction) -> None:

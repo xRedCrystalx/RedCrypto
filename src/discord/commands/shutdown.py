@@ -6,13 +6,13 @@ import src.connector as con
 
 class Shutdown(commands.Cog):
     def __init__(self) -> None:
-        self.connector: con.Connector = con.connector
+        self.shared: con.SharedResource = con.shared
 
     @app_commands.command(name="stop")
     async def shutdown(self, interaction: discord.Interaction) -> None:
         #if ctx.author.id in [x for x in BotData["owners"]]:
         await interaction.response.send_message(content="Killing the process")
-        await self.connector.discord_bot.close()
+        await self.shared.discord_bot.close()
         
         await con.terminate()
 
