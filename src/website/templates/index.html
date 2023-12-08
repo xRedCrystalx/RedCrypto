@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Price Chart</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div id="live-chart"></div>
+    <script>
+        let priceData = {
+            x: [],
+            y: [],
+            text: [],
+            mode: 'lines+markers',
+            type: 'scatter',
+            name: 'Price',
+        };
+
+        let buyData = {
+            x: [],
+            y: [],
+            text: [],
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                color: 'green',
+                size: 10,
+            },
+            name: 'Buy',
+        };
+
+        let sellData = {
+            x: [],
+            y: [],
+            text: [],
+            mode: 'markers',
+            type: 'scatter',
+            marker: {
+                color: 'red',
+                size: 10,
+            },
+            name: 'Sell',
+        };
+
+        let layout = {
+            title: 'Live Price Chart',
+            xaxis: {
+                autorange: true,
+                type: 'date',
+            },
+            yaxis: {
+                autorange: true,
+                type: 'linear',
+            },
+            autosize: true,
+            showlegend: true,
+            height: window.innerHeight - 70,
+            margin: {l: 0, r: 0, t: 0, b: 0},
+        };
+
+        let config = {responsive: true};
+
+        let chart = Plotly.newPlot('live-chart', [priceData, buyData, sellData], layout, config);
+
+        setInterval(() => {
+            fetch('/get_data')
+                .then(response => response.json())
+                .then(data => {
+                    const now = new Date();
+                    const timestamp = now.toISOString();
+                    const showText = `Timestamp: ${timestamp}<br>Price: ${data.price.toFixed(2)} EUR`;
+
+                    Plotly.extendTraces('live-chart', {x: [[timestamp]], y: [[data.price]], text: [[showText]]}, [0]);
+
+                    // Simulate buy/sell events
+                    if (Math.random() < 0.1) {
+                        Plotly.addTraces('live-chart', {x: [timestamp], y: [data.price], text: [showText], type: 'scatter', mode: 'markers', marker: {color: 'green', size: 10}, name: 'Buy'});
+                    }
+                    if (Math.random() < 0.1) {
+                        Plotly.addTraces('live-chart', {x: [timestamp], y: [data.price], text: [showText], type: 'scatter', mode: 'markers', marker: {color: 'red', size: 10}, name: 'Sell'});
+                    }
+                });
+        }, 5000);
+    </script>
+</body>
+</html>
