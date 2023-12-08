@@ -19,6 +19,13 @@
         "switch" : true,
         "guild_id" : 938804743122346074,
         "administrators" : [382213226181558272, 333588605748510721],
-        "token" : "MTAyMTM0MjYyNzg3MTg1NDU5Mg.Gbbp30.vghqLd4GnBD2oIKmZMBvBgXBpt1ru6isU-fslw"
+        "token" : "MTAyMTM0MjYyNzg3MTg1NDU5Mg.Gbbp30.vghqLd4GnBD2oIKmZMBvBgXBpt1ru6isU-fslw",
+        "logger" : "NE DELA TRENUTNO"
+    },
+    "local-tracking" : {
+        "switch" : false,
+        "host" : "0.0.0.0",
+        "port" : 1111,
+        "HTMLpath" : ""
     }
 }
