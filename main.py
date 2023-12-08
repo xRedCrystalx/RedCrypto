@@ -4,6 +4,7 @@ from src.system.colors import auto_color_handler, C, CNone
 import src.connector as con
 from src.discord.bot import DiscordHandler
 from src.crypto.main import CryptoMain
+from src.website.API import API
 
 class Main:
     def __init__(self) -> None:
@@ -36,12 +37,21 @@ class Main:
         print(f"""{self.c.Red}
 ____ ____ ___    ____ ____ _   _ ___  ___ ____ 
 |__/ |___ |  \\   |    |__/  \\_/  |__]  |  |  | 
-|  \\ |___ |__/   |___ |  \\   |   |     |  |__| 
-{self.c.R}""")
+|  \\ |___ |__/   |___ |  \\   |   |     |  |__|
+{self.c.R}
+Initializing..""")
         
-        # starting discord bot in async thread so it doesn't block the main function of the program
+        # starting discord bot in async thread
         if self.config["discord"]["switch"]:
             self.loop.run_in_executor(None, DiscordHandler().start)
+        else:
+            print(f"{self.c.DBlue}INFO {self.c.R}>> Discord bot is disabled")
+        
+        # starting local tracking of buy/sell and price - website server
+        if self.config["local-tracking"]["switch"]:
+            self.loop.run_in_executor(None, API().start)
+        else:
+            print(f"{self.c.DBlue}INFO {self.c.R}>> Webserver (tracker) is disabled.")
         
         # starting connection with binance / ccxt in async thread
         self.loop.run_in_executor(None, CryptoMain().start)
