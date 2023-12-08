@@ -6,7 +6,7 @@ import src.connector as con
 
 class Sell(commands.Cog):
     def __init__(self) -> None:
-        self.shared: con.SharedResource = con.shared
+        self.bot: commands.Bot = con.read_shared("discord_bot")
 
     @app_commands.command(name="sell")
     async def sell(self, interaction: discord.Interaction) -> None:

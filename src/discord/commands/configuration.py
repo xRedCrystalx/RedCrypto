@@ -6,7 +6,7 @@ import src.connector as con
 
 class Configuration(commands.Cog):
     def __init__(self) -> None:
-        self.shared: con.SharedResource = con.shared
+        self.bot: commands.Bot = con.read_shared("discord_bot")
 
     @app_commands.command(name="config")
     async def config(self, interaction: discord.Interaction) -> None:
