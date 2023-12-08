@@ -2,14 +2,13 @@ import sys, ccxt, typing
 sys.dont_write_bytecode = True
 
 
-class Sell:
-    def __init__(self):
-        ...
+async def sell() -> bool:
+    ...
 
-class Buy:
-    def __init__(self):
-        ...
+async def buy() -> bool:
+    ...
 
 class AccountInfo:
     def __init__(self):
         ...
+ 
