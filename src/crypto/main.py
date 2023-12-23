@@ -30,7 +30,8 @@ class CryptoMain:
                 "apiKey" : self.config["binance"]["API-key"],
                 "secret" : self.config["binance"]["API-secret"]
             })
-
+            con.write_shared("binance", self.binance)
+            
             # initializira requesterja in ga shrani
             requester: PriceRequester = PriceRequester()
             con.write_shared("price_requester", requester)
