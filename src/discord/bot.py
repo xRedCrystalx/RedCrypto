@@ -7,13 +7,14 @@ class MyBot(commands.AutoShardedBot):
     #initializing bot (intents, shards, prefix..)
     def __init__(self) -> None:
         self.colors: con.C | con.CNone = con.read_shared(var="colors")
-        con.shared.discord_bot = self
+        con.write_shared("discord_bot", self)
         super().__init__(command_prefix="!", intents=discord.Intents.all(), shard_count=1, help_command=None)
 
-    #starting setup_hook -> loading all extensions and syncing commands. !aiohttp required!
+    # setup_hook - nalaganje vseh modulov predenj se poveže na discord
     async def setup_hook(self) -> None:
         self.session: aiohttp.ClientSession = aiohttp.ClientSession()
-        #Loading Extensions
+        
+        # nalaganje vseh modulov
         cogPaths: tuple[str, ...] = ("src\\discord\\listeners", "src\\discord\\commands")
         for cogPath in cogPaths:
             counter = 0
@@ -27,29 +28,33 @@ class MyBot(commands.AutoShardedBot):
                 except Exception as error:
                     print(f"DISCORD >> {self.colors.Red}Failed to load {cog}: {type(error).__name__}; {error}{self.colors.R}")
 
-        #Syncing Attempts   
+        # syncing komand globalno 
         try:
             await self.tree.sync()
         except Exception as error:
             print(f"DISCORD >> {self.colors.Red}Failed to globally sync bot. {type(error).__name__}: {error}{self.colors.R}")
 
-    #Closing aiohttp session
+    # zapiranje povezave z discordom (zato da ne dobim errorje)
     async def close(self) -> None:
         await super().close()
+        print(f"DISCORD >> Closed connection with discord.")
         await self.session.close()
 
-    #Connect to discord
+    # povezava na discord
     async def on_ready(self) -> None:
         print(f"DISCORD >> {self.colors.Magenta}{self.user} has connected to Discord!{self.colors.R}")
         await self.change_presence(status=discord.Status.online, activity=discord.Activity(type=discord.ActivityType.watching, name="Binance"))
 
+# loader handler
 class DiscordHandler:
     def start(self) -> None:
         try:
+            # štartanje discord bota
             bot = MyBot()
-            config = con.read_shared(var="config")
-            bot.run(token=config["discord"]["token"], reconnect=True)#, log_handler=True
-            
-        except Exception as e:
-            print(e)
+            con.write_shared("discord_bot", bot)
+            bot.run(token=con.read_shared(var="config")["discord"]["token"], reconnect=True)#, log_handler=None
+        
+        except Exception as error:
+            print(f"DiscordHandler >> Error when starting the bot. {type(error).__name__}: {error}")
+            con.terminate()
 
