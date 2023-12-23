@@ -16,16 +16,21 @@
         "API-secret" : ""
     },
     "discord" : {
-        "switch" : true,
+        "switch" : false,
         "guild_id" : 938804743122346074,
         "administrators" : [382213226181558272, 333588605748510721],
         "token" : "MTAyMTM0MjYyNzg3MTg1NDU5Mg.Gbbp30.vghqLd4GnBD2oIKmZMBvBgXBpt1ru6isU-fslw",
-        "logger" : "NE DELA TRENUTNO"
+        "logger" : "NE DELA TRENUTNO",
+        "channels" : {
+            "hourly_reports" : null,
+            "daily_reports" : null,
+            "transactions" : null
+        }
     },
     "local-tracking" : {
-        "switch" : false,
+        "switch" : true,
         "host" : "0.0.0.0",
         "port" : 1111,
-        "HTMLpath" : ""
+        "webhook" : "https://discord.com/api/webhooks/1186357287175081984/wwcvAbjU8dtrKB9rWDax_Ac_m0Duu5LPwRBDuyY79x6siTP_5_7LV8qYnyUmKaZ5FH1g"
     }
 }
