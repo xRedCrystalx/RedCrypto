@@ -4,7 +4,7 @@ from src.system.colors import auto_color_handler, C, CNone
 import src.connector as con
 from src.discord.bot import DiscordHandler
 from src.crypto.main import CryptoMain
-from src.website.API import API
+from src.website.API import MainWebsite
 
 class Main:
     def __init__(self) -> None:
@@ -14,7 +14,7 @@ class Main:
         with open(file=f"{self.path}/src/config.json") as config:
             self.config: dict = json.load(fp=config)
     
-    # save everything to connector class
+    # shranjevanje v shared dataclass
     async def save(self) -> None:
         try:
             shared.config = self.config
@@ -25,11 +25,11 @@ class Main:
             return False
         return True
         
-    # start of the discord bot file & CCXT    
+    # main funkcija k vse zažene
     async def main(self) -> None:
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
         
-        # terminate if failed to save to connector
+        # terminira če shranjevanje faila
         if not await self.save():
             await con.terminate()
             
@@ -41,22 +41,26 @@ ____ ____ ___    ____ ____ _   _ ___  ___ ____
 {self.c.R}
 Initializing..""")
         
-        # starting discord bot in async thread
+        # začetek discord bota v novem threadu
         if self.config["discord"]["switch"]:
-            self.loop.run_in_executor(None, DiscordHandler().start)
+            shared.discord = DiscordHandler()
+            self.loop.run_in_executor(None, shared.discord.start)
         else:
             print(f"{self.c.DBlue}INFO {self.c.R}>> Discord bot is disabled")
         
-        # starting local tracking of buy/sell and price - website server
+        # začetek internetne strani v novem threadu
         if self.config["local-tracking"]["switch"]:
-            self.loop.run_in_executor(None, API().start)
+            shared.website = MainWebsite()
+            self.loop.run_in_executor(None, shared.website.start)
         else:
             print(f"{self.c.DBlue}INFO {self.c.R}>> Webserver (tracker) is disabled.")
         
-        # starting connection with binance / ccxt in async thread
-        self.loop.run_in_executor(None, CryptoMain().start)
+        # zcetek celotne logike in povezave z binance v novem threadu
+        shared.binance = CryptoMain()
+        self.loop.run_in_executor(None, shared.binance.start)
         
         
 if __name__ == "__main__":
     shared: con.SharedResource = con.shared
     asyncio.run(Main().main())
+    
