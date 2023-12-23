@@ -2,6 +2,7 @@ import ccxt, sys, asyncio
 sys.dont_write_bytecode = True
 import src.connector as con
 from src.crypto.transmitters.API2Client import PriceRequester
+from src.crypto.transmitters.sandbox import RequesterSimulator
 
 class CryptoMain:
     def __init__(self) -> None:
@@ -15,6 +16,12 @@ class CryptoMain:
         if con.read_shared("config")["general"]["sandbox"]:
             print(f"{self.c.Gray}{"SANDBOX MODE IS ENABLED":-^45}{self.c.R}")
             
+            # initializira requesterja in ga shrani
+            requester: RequesterSimulator = RequesterSimulator()
+            con.write_shared("price_requester", requester)
+            
+            # zažene requesterja v novem TASKu
+            self.loop.create_task(requester.start())
         
         # drugače začnemo normalno
         else:
@@ -24,7 +31,7 @@ class CryptoMain:
                 "secret" : self.config["binance"]["API-secret"]
             })
 
-            # initializira requesterjain ga shrani
+            # initializira requesterja in ga shrani
             requester: PriceRequester = PriceRequester()
             con.write_shared("price_requester", requester)
             
