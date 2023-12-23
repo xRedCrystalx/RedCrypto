@@ -2,3 +2,9 @@ aiohttp
 discord.py
 ccxt
 selenium
+flask
+flask_socketio
+plotly
+kaleido==0.1.0
+schedule
+requests
