@@ -1,178 +1,111 @@
-import sys, discord, typing, ccxt, os, asyncio, threading
+import sys, typing, ccxt, asyncio, threading
 sys.dont_write_bytecode = True
-from src.system.colors import C, CNone
 from discord.ext import commands
+
+if typing.TYPE_CHECKING:
+    import discord
+    from src.discord.bot import DiscordHandler
+    from src.crypto.main import CryptoMain
+    from src.website.API import MainWebsite
+    from src.system.colors import C, CNone
+    from src.crypto.transmitters.API2Client import PriceRequester
 
 class SharedResource:
     def __init__(self) -> None:
         self.lock: threading.Lock = threading.Lock()
         
-        #global
+        # glavni clasi
+        self.discordHandler: DiscordHandler = None
+        self.trackingWebsite: MainWebsite = None
+        self.cryptoMain: CryptoMain = None
+        
+        # globalni var
         self.path: str = None
         self.colors: C | CNone = None
         self.config: dict = None
         self.loop: asyncio.AbstractEventLoop = None
 
-        # discord
+        # discord stvari
         self.discord_bot: commands.Bot = None
         self.discord_notifications: list[dict[str, bool | str | float]] = []
 
-        #crypto
-        self.interval: int | float = 5
+        # crypto stvari
+        self.binance: ccxt.binance = None
+        self.interval: int | float = 15
         self.transaction_db: dict = {}
-        self.price_db: dict = {}
+        
+        self.price_requester: PriceRequester = None
+        
+        # tracking
+        self.hourly_tracker: list[dict[str, float | str]] = []
 
 shared = SharedResource()
 
+# branje podatkov iz shared classa (thread safe)
 def read_shared(var: str) -> typing.Any:
     with shared.lock:
         try:
             return getattr(shared, var)
         except:
             return None
+
     
-def update_shared(var: str, value: typing.Any, action: typing.Literal["replace", "add", "substract", "divide", "multiply", "append", "remove", "pop", "update"] = "replace", extra: typing.Any = None) -> bool:
+# pisanje podatkov iz shared classa (thread safe)
+def write_shared(var: str, value: typing.Any) -> None:
     with shared.lock:
         try:
-            shared_variable: typing.Any = getattr(shared, var)
-        except:
-            return False
-        
-        if isinstance(shared_variable, list):
-            if action in ("replace", "append", "pop", "remove"):
-                if action == "replace":
-                    shared_variable = value
-                    return True
-                
-                elif action == "append":
-                    shared_variable.append(value)
-                    return True
-                
-                elif action == "pop":
-                    if isinstance(extra, int):
-                        try:
-                            shared_variable.pop(extra)
-                            return True
-                        except:
-                            return False
-                
-                elif action == "remove":
-                    try:
-                        shared_variable.remove(value)
-                        return True
-                    except:
-                        return False
-            return False
-        
-        elif isinstance(shared_variable, dict):
-            def path_loader(strPath: str) -> typing.Any:
-                for path in strPath.split("."):
-                    try:
-                        shared_variable = shared_variable[path]
-                    except:
-                        return None
-                return shared_variable
+            setattr(shared, var, value)
+        except Exception as e:
+            print(f"Error writing to '{var}': {e}")
+
+def update_shared(var_path: str, update_type: typing.Literal["extend", "append", "update", "add", "remove", "multiply", "divide"], update_value: typing.Any) -> None:
+    with shared.lock:
+        try:
+            keys: list[str] = var_path.split('.')
+            current_value = getattr(shared, keys[0])
+
+            for key in keys[1:]:
+                current_value = current_value[key]            
             
-            if action in ("replace", "update", "pop"):
-                if action == "replace":
-                    if isinstance(extra, str):
-                        shared_variable = path_loader(extra)
-                        if shared_variable:
-                            shared_variable = value
-                            return True
-                    else:
-                        shared_variable = value
-                        return True
-                
-                elif action == "update":
-                    if isinstance(value, dict):
-                        if isinstance(extra, str):
-                            shared_variable = path_loader(extra)
-                            if shared_variable:
-                                shared_variable.update(value)
-                                return True
-                        else:
-                            shared_variable.update(value)
-                            return True
-                    return False
+            if isinstance(current_value, list):
+                if update_type == "extend":
+                    current_value.extend(update_value)
+                    setattr(shared, keys[0], current_value)
+                elif update_type == "append":
+                    current_value.append(update_value)
+                    setattr(shared, keys[0], current_value)
                     
-                elif action == "pop":
-                    if isinstance(extra, str):
-                        shared_variable = path_loader(extra)
-                        if shared_variable:
-                            try:
-                                shared_variable.pop(value)
-                                return True
-                            except:
-                                return False
-                    else:
-                        try:
-                            shared_variable.pop(value)
-                            return True
-                        except:
-                            return False
-                    return False
-        
-        elif type(shared_variable) in (int, float):
-            if action in ("replace", "add", "substract", "divide", "multiply"):
-                if type(value) in (int, float):
-                    if action == "replace":
-                        shared_variable = value
-                        return True
-                    
-                    elif action == "add":
-                        shared_variable += value
-                        return True
-                        
-                    elif action == "substract":
-                        shared_variable -= value
-                        return True
+            elif isinstance(current_value, (int, float)):
+                if update_type == "add":
+                    setattr(shared, keys[0], current_value + update_value)
+                elif update_type == "remove":
+                    setattr(shared, keys[0], current_value - update_value)
+                elif update_type == "multiply":
+                    setattr(shared, keys[0], current_value * update_value)
+                elif update_type == "divide" and update_value != 0:
+                    setattr(shared, keys[0], current_value / update_value)
+                else:
+                    print(f"Error: Unsupported numeric operation for '{var_path}'")                
 
-                    elif action == "divide":
-                        shared_variable /= value
-                        return True
-                    
-                    elif action == "multiply":
-                        shared_variable *= value
-                        return True
-            return False
-        
-        elif isinstance(shared_variable, str):
-            if action in ("replace", "add", "multiply"):
-                if isinstance(value, str) or isinstance(value, None):
-                    if action == "replace":
-                        shared_variable = value
-                        return True
-                    
-                    elif action == "add":
-                        shared_variable += value
-                        return True
-                    
-                    elif action == "multiply":
-                        if isinstance(extra, int):
-                            shared_variable *= extra
-                            return True
-            return False
-                
-        elif isinstance(shared_variable, bool):
-            if action == "replace":
-                shared_variable = value
-                return True
-            return False
-        
-        else:
-            shared_variable = value
-            return True
+            # DICT SUPPORT NEEDED
 
-async def terminate() -> None:
+        except Exception as e:
+            print(f"Error updating '{var_path}': {e}")
+
+
+# terminate funkcija
+def terminate() -> None:
     print(f"{shared.colors.Red}TERMINATING.{shared.colors.R}")
 
     if shared.discord_bot:
         try:
             # close connection with discord
-            await shared.discord_bot.close()
+            asyncio.run(shared.discord_bot.close())
         except Exception as error:
-            print(error)
+            print(f"TERMINATOR >> Error with terminating discord bot. {type(error).__name__}: {error}")
+            
+    if shared.price_requester:
+        shared.price_requester.infLoop = False
     
     try:
         # kill main loop and its tasks/threads
