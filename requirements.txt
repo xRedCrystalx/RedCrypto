@@ -1,10 +1,10 @@
-aiohttp
-discord.py
-ccxt
+aiohttp==3.9.1
+discord.py==2.3.2
+ccxt==4.2.4
 selenium
 flask
-flask_socketio
-plotly
+flask_socketio==5.3.6
+plotly==5.18.0
 kaleido==0.1.0
 schedule
 requests
