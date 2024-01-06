@@ -1,10 +1,12 @@
-import sys, asyncio, os, json
+import sys, asyncio, os, json, typing
 sys.dont_write_bytecode = True
 from src.system.colors import auto_color_handler, C, CNone
 import src.connector as con
 from src.discord.bot import DiscordHandler
 from src.crypto.main import CryptoMain
 from src.website.API import MainWebsite
+
+typing.TYPE_CHECKING = True
 
 class Main:
     def __init__(self) -> None:
@@ -21,6 +23,8 @@ class Main:
             shared.colors = self.c
             shared.path = self.path
             shared.loop = self.loop
+            shared.sandbox = self.sandbox
+            shared.WALLET = self.config["general"]["sandbox"]["wallet"]
         except Exception:
             return False
         return True
@@ -28,6 +32,7 @@ class Main:
     # main funkcija k vse zažene
     async def main(self) -> None:
         self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        self.sandbox: bool = self.config["general"]["sandbox"]["status"]
         
         # terminira če shranjevanje faila
         if not await self.save():
@@ -40,24 +45,25 @@ ____ ____ ___    ____ ____ _   _ ___  ___ ____
 |  \\ |___ |__/   |___ |  \\   |   |     |  |__|
 {self.c.R}
 Initializing..""")
-        
+
         # začetek discord bota v novem threadu
         if self.config["discord"]["switch"]:
-            shared.discord = DiscordHandler()
-            self.loop.run_in_executor(None, shared.discord.start)
+            shared.discordHandler = DiscordHandler()
+            self.loop.run_in_executor(None, shared.discordHandler.start)
         else:
             print(f"{self.c.DBlue}INFO {self.c.R}>> Discord bot is disabled")
         
         # začetek internetne strani v novem threadu
         if self.config["local-tracking"]["switch"]:
-            shared.website = MainWebsite()
-            self.loop.run_in_executor(None, shared.website.start)
+            shared.trackingWebsite = MainWebsite()
+            self.loop.run_in_executor(None, shared.trackingWebsite.start)
+            print(f"Local website link: {self.c.Magenta}http://localhost:{self.config["local-tracking"]["port"]}/ {self.c.R}")
         else:
             print(f"{self.c.DBlue}INFO {self.c.R}>> Webserver (tracker) is disabled.")
-        
-        # zcetek celotne logike in povezave z binance v novem threadu
-        shared.binance = CryptoMain()
-        self.loop.run_in_executor(None, shared.binance.start)
+    
+        # zacetek celotne logike in povezave z binance v novem threadu
+        shared.cryptoMain = CryptoMain()
+        self.loop.run_in_executor(None, shared.cryptoMain.start)
         
         
 if __name__ == "__main__":
