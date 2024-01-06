@@ -9,6 +9,8 @@ if typing.TYPE_CHECKING:
     from src.website.API import MainWebsite
     from src.system.colors import C, CNone
     from src.crypto.transmitters.API2Client import PriceRequester
+    from src.crypto.transmitters.Client2API import Market
+    from src.crypto.transmitters.sandbox import MarketSimulator, RequesterSimulator
 
 class SharedResource:
     def __init__(self) -> None:
@@ -24,20 +26,43 @@ class SharedResource:
         self.colors: C | CNone = None
         self.config: dict = None
         self.loop: asyncio.AbstractEventLoop = None
+        self.sandbox: bool = None
 
         # discord stvari
-        self.discord_bot: commands.Bot = None
+        self.discord_bot: commands.Bot = None 
         self.discord_notifications: list[dict[str, bool | str | float]] = []
 
         # crypto stvari
         self.binance: ccxt.binance = None
+        self.price_requester: PriceRequester | RequesterSimulator = None
+        self.market: Market | MarketSimulator = None
         self.interval: int | float = 15
-        self.transaction_db: dict = {}
         
-        self.price_requester: PriceRequester = None
+        # databaze
+        self.logic_db: dict[str, list[int | float] | int | float | None] = {
+            "lastPrice" : None,
+            "priceDB" : [],
+            "precentDB" : [],
+            "buy" : {
+                "%" : None,
+                "counter" : 0
+            }
+        }
+        self.transaction_db: list[dict[str, typing.Any]] = []
         
         # tracking
         self.hourly_tracker: list[dict[str, float | str]] = []
+        self.daily_tracker: dict[str, float | int] = {
+            "buy_events" : 0,
+            "sell_events" : 0,
+            "profit" : 0.0, 
+            "lowest" : 9999999999999,
+            "highest" : 0
+        }
+
+        # sandbox
+        self.WALLET: float = None
+        self.CURRENT_MARKET_PRICE: float = 0
 
 shared = SharedResource()
 
@@ -57,40 +82,6 @@ def write_shared(var: str, value: typing.Any) -> None:
             setattr(shared, var, value)
         except Exception as e:
             print(f"Error writing to '{var}': {e}")
-
-def update_shared(var_path: str, update_type: typing.Literal["extend", "append", "update", "add", "remove", "multiply", "divide"], update_value: typing.Any) -> None:
-    with shared.lock:
-        try:
-            keys: list[str] = var_path.split('.')
-            current_value = getattr(shared, keys[0])
-
-            for key in keys[1:]:
-                current_value = current_value[key]            
-            
-            if isinstance(current_value, list):
-                if update_type == "extend":
-                    current_value.extend(update_value)
-                    setattr(shared, keys[0], current_value)
-                elif update_type == "append":
-                    current_value.append(update_value)
-                    setattr(shared, keys[0], current_value)
-                    
-            elif isinstance(current_value, (int, float)):
-                if update_type == "add":
-                    setattr(shared, keys[0], current_value + update_value)
-                elif update_type == "remove":
-                    setattr(shared, keys[0], current_value - update_value)
-                elif update_type == "multiply":
-                    setattr(shared, keys[0], current_value * update_value)
-                elif update_type == "divide" and update_value != 0:
-                    setattr(shared, keys[0], current_value / update_value)
-                else:
-                    print(f"Error: Unsupported numeric operation for '{var_path}'")                
-
-            # DICT SUPPORT NEEDED
-
-        except Exception as e:
-            print(f"Error updating '{var_path}': {e}")
 
 
 # terminate funkcija
@@ -114,4 +105,4 @@ def terminate() -> None:
         print(error)
 
     # system exit
-    #sys.exit(0)
+    sys.exit(0)
