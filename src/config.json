@@ -1,6 +1,11 @@
 {
     "general" : {
-        "sandbox" : false,
+        "sandbox" : {
+            "status" : true,
+            "events_path" : "C:\\Users\\domen\\Documents\\Projects\\RedCrypto\\events.txt",
+            "interval" : 30,
+            "wallet" :  1000
+        },
         "symbol" : "BTC/EUR",
         "selenium" : {
             "url" : "https://www.binance.com/en/trade/BTC_EUR?type=spot",
@@ -22,15 +27,15 @@
         "token" : "MTAyMTM0MjYyNzg3MTg1NDU5Mg.Gbbp30.vghqLd4GnBD2oIKmZMBvBgXBpt1ru6isU-fslw",
         "logger" : "NE DELA TRENUTNO",
         "channels" : {
-            "hourly_reports" : null,
-            "daily_reports" : null,
-            "transactions" : null
+            "hourly_reports" : 1186357242677694569,
+            "daily_reports" : 1191076303651225722,
+            "transactions" : 1188879038610161676,
+            "errors" : 1191746735047987221
         }
     },
     "local-tracking" : {
         "switch" : true,
         "host" : "0.0.0.0",
-        "port" : 1111,
-        "webhook" : "https://discord.com/api/webhooks/1186357287175081984/wwcvAbjU8dtrKB9rWDax_Ac_m0Duu5LPwRBDuyY79x6siTP_5_7LV8qYnyUmKaZ5FH1g"
+        "port" : 1111
     }
 }
