@@ -12,9 +12,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 
 # za typehinte
-if typing.TYPE_CHECKING:
-    from ccxt.base.types import Ticker
-    from selenium.webdriver.Chrome.webdriver import WebDriver
+#if typing.TYPE_CHECKING:
+from ccxt.base.types import Ticker
+#from selenium.webdriver.Chrome.webdriver import WebDriver
 
 class PriceRequester:
     def __init__(self) -> None:
@@ -24,7 +24,7 @@ class PriceRequester:
         self.exchange: ccxt.binance = None
         self.infLoop: bool = True
         
-    async def _start_selenium_instance(self) -> bool | WebDriver:
+    async def _start_selenium_instance(self) -> bool:#| WebDriver
         # podpora za use webdriverje
         filter: dict[str, tuple[typing.Callable]] = {
             "chrome" : (Chrome, ChromeService, ChromeOptions),
