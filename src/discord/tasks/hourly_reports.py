@@ -1,4 +1,4 @@
-import sys, typing, datetime, schedule, asyncio, requests
+import sys, typing, datetime, schedule, asyncio, requests, json
 sys.dont_write_bytecode = True
 import plotly.graph_objects as go
 import src.connector as con
@@ -8,8 +8,7 @@ class HourlyReports:
     def __init__(self) -> None:
         self.loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
         self.loop.create_task(self.start())
-        
-    
+
     def create_report(data: list[dict[str, float | str]]) -> bytes | None:
         fig: go.Figure = go.Figure()
         fig.update_layout(template="plotly_dark", title="Hourly Report", xaxis_title="Time", yaxis_title="Price in EUR")
@@ -23,7 +22,7 @@ class HourlyReports:
                 "x" : [],
                 "y" : []
             },
-            "update_data" : {
+            "update_price" : {
                 "x" : [],
                 "y" : []
             }
@@ -38,14 +37,13 @@ class HourlyReports:
                 traces["sell_event"]["x"].append(event["x"])
                 traces["sell_event"]["y"].append(event["y"])
 
-            elif name == "update_data":
-                traces["update_data"]["x"].append(event["x"])
-                traces["update_data"]["y"].append(event["y"])
+            elif name == "update_price":
+                traces["update_price"]["x"].append(event["x"])
+                traces["update_price"]["y"].append(event["y"])
         
-        fig.add_trace(go.Scatter(x=traces["update_data"]["x"], y=traces["update_data"]["y"], mode="lines+markers", name="Price Trace"))     
+        fig.add_trace(go.Scatter(x=traces["update_price"]["x"], y=traces["update_price"]["y"], mode="lines+markers", name="Price Trace"))     
         fig.add_trace(go.Scatter(x=traces["buy_event"]["x"], y=traces["buy_event"]["y"], mode="markers", marker={"color": "red", "size" : 12}, name="Buy Event"))
         fig.add_trace(go.Scatter(x=traces["sell_event"]["x"], y=traces["sell_event"]["y"], mode="markers", marker={"color": "green", "size" : 12}, name="Sell Event", text=['A', 'B', 'C', 'D', 'E'], textposition="auto"))
-
         return img if (img := fig.to_image(format="png", engine="kaleido", width=1920, height=1080)) else None #width=3840, height=2160
     
     def send_to_discord(image_bytes: bytes) -> None:
@@ -89,7 +87,7 @@ class HourlyReports:
             con.write_shared("hourly_tracker", [])
     
     async def start(self) -> None:
-        schedule.every().minute.do(self.loader)
+        schedule.every().hour.at(":00").do(self.loader)
         while True:
             schedule.run_pending()
-            await asyncio.sleep(1)
+            await asyncio.sleep(45)
