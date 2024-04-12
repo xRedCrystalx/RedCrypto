@@ -3,18 +3,10 @@
         "sandbox" : {
             "status" : true,
             "events_path" : "C:\\Users\\domen\\Documents\\Projects\\RedCrypto\\events.txt",
-            "interval" : 30,
-            "wallet" :  1000
+            "interval" : 60,
+            "wallet" :  40000
         },
-        "symbol" : "BTC/EUR",
-        "selenium" : {
-            "url" : "https://www.binance.com/en/trade/BTC_EUR?type=spot",
-            "XPATH" : "/html/body/div[3]/div[4]/div/div[6]/div/div[1]/div[1]/div/div[2]/div[1]",
-
-            "webdriver" : "chrome",
-            "path" : "C:\\Users\\domen\\Documents\\RedCrypto\\test\\chromedriver.exe",
-            "arguments" : ["--headless"]
-        }
+        "symbol" : "BTC/EUR"
     },
     "binance" : {
         "API-key" : "",
@@ -22,15 +14,14 @@
     },
     "discord" : {
         "switch" : false,
-        "guild_id" : 938804743122346074,
-        "administrators" : [382213226181558272, 333588605748510721],
-        "token" : "MTAyMTM0MjYyNzg3MTg1NDU5Mg.Gbbp30.vghqLd4GnBD2oIKmZMBvBgXBpt1ru6isU-fslw",
+        "guild_id" : 0,
+        "administrators" : [],
+        "token" : "",
         "logger" : "NE DELA TRENUTNO",
         "channels" : {
-            "hourly_reports" : 1186357242677694569,
-            "daily_reports" : 1191076303651225722,
-            "transactions" : 1188879038610161676,
-            "errors" : 1191746735047987221
+            "daily_reports" : 0,
+            "transactions" : 0,
+            "errors" : 0
         }
     },
     "local-tracking" : {

@@ -6,15 +6,13 @@ from src.discord.bot import DiscordHandler
 from src.crypto.main import CryptoMain
 from src.website.API import MainWebsite
 
-typing.TYPE_CHECKING = True
-
 class Main:
     def __init__(self) -> None:
         self.c: C | CNone = auto_color_handler()
         self.path: str = os.path.dirname(os.path.realpath(__file__))
         
         with open(file=f"{self.path}/src/config.json") as config:
-            self.config: dict = json.load(fp=config)
+            self.config: dict = json.load(config)
     
     # shranjevanje v shared dataclass
     async def save(self) -> None:
@@ -63,10 +61,8 @@ Initializing..""")
     
         # zacetek celotne logike in povezave z binance v novem threadu
         shared.cryptoMain = CryptoMain()
-        self.loop.run_in_executor(None, shared.cryptoMain.start)
-        
+        self.loop.run_in_executor(None, shared.cryptoMain.start)      
         
 if __name__ == "__main__":
     shared: con.SharedResource = con.shared
     asyncio.run(Main().main())
-    

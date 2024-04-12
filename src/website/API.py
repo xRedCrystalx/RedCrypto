@@ -19,7 +19,7 @@ class MainWebsite:
         self.config: dict = con.read_shared("config")
     	
         # datetime za sandbox
-        self.last_time: datetime.date = datetime.datetime.now()
+        self.last_time: datetime.datetime = datetime.datetime.now()
 
         # route na root (/) ki naloži html scripto
         @self.app.route("/")
@@ -42,7 +42,7 @@ class MainWebsite:
             print(f"SOCKET >> Error: {type(error).__name__}: {error}")
 
     # funkcija ki nardi update preko socket povezave
-    def make_update(self, action: typing.Literal["sell_event", "buy_event", "update_price"], y_price: int | float, x_time: datetime.datetime) -> None:
+    def make_update(self, action: typing.Literal["sell_event", "buy_event", "update_price", "high_event", "low_event", "filtered_event"], y_price: int | float, x_time: datetime.datetime) -> None:
         try:
             if not self.sandbox:
                 # normalen emit, brez sandbox moda
@@ -56,6 +56,17 @@ class MainWebsite:
                 if action == "update_price":
                     self.last_time = self.last_time + datetime.timedelta(seconds=self.config["general"]["sandbox"]["interval"])
                     self.socketio.emit(action, {"y": y_price, "x" : int(time.mktime(self.last_time.timetuple())) * 1000}, namespace='/')
+
+                    if self.last_time.hour == 0 and self.last_time.minute == 0:
+                        transactions_db: dict[str, dict[str, int]] = con.read_shared("transaction_db")
+                        for transaction in transactions_db:
+                            transaction["data"]["life"] -= 1
+
+                        con.write_shared("transaction_db", transactions_db)
+                        
+
+                elif action == "high_event" or action == "low_event":
+                    self.socketio.emit(action, {"price": y_price, "point" : x_time}, namespace="/")
                 
                 # drugi eventi pa ostanjeo
                 else:

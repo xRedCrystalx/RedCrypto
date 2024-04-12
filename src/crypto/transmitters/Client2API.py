@@ -1,9 +1,7 @@
 import sys, ccxt, typing, asyncio
 sys.dont_write_bytecode = True
 import src.connector as con
-
-if True:
-    from ccxt.base.types import Order
+from ccxt.base.types import Order
 
 class Market:
     def __init__(self) -> None:
@@ -51,7 +49,6 @@ class Market:
             return True
         
         return False
-        
 
     async def buy(self, quantity_in_precent: float, current_price: float) -> bool:
         balance: float = await self.get_balance()
@@ -66,44 +63,5 @@ class Market:
 
         return False
 
-
     async def get_balance(self) -> float:
         return self.exchange.fetch_balance()["free"]["BTC"]
-
-
-#NOTE: PREGLED ZA PRICE, DA BO ZNAU DOLOČIT
-
-"""
-class Balance(TypedDict):
-    free: Num
-    used: Num
-    total: Num
-    debt: NotRequired[Num]
- 
-
-
- class Order(TypedDict):
-    info: Dict[str, Any]
-    id: Str
-    clientOrderId: Str
-    datetime: Str
-    timestamp: Int
-    lastTradeTimestamp: Int
-    lastUpdateTimestamp: Int
-    status: Str
-    symbol: Str
-    type: Str
-    timeInForce: Str
-    side: OrderSide
-    price: Num
-    average: Num
-    amount: Num
-    filled: Num
-    remaining: Num
-    stopPrice: Num
-    takeProfitPrice: Num
-    stopLossPrice: Num
-    cost: Num
-    trades: List[Trade]
-    fee: Fee
- """

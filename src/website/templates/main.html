@@ -24,7 +24,16 @@
             x: [],
             y: [],
             type: 'scatter',
-            mode: 'lines+markers',
+            mode: 'lines', //+markers
+        };
+
+        var filteredData = {
+            name: "Filtered Price Graph",
+            x: [],
+            y: [],
+            type: 'scatter',
+            mode: 'lines',
+            line: {color: "yellow"},
         };
 
         var buyData = {
@@ -43,6 +52,41 @@
             type: 'scatter',
             mode: 'markers',
             marker: {color: 'red', size: 10},
+        };
+
+        var highestPoint = {
+            name: "Highest point",
+            x: [],
+            y: [],
+            type: "scatter",
+            mode: "lines",
+            line: {color: "purple"}
+        };
+        var lowestPoint = {
+            name: "Lowest point",
+            x: [],
+            y: [],
+            type: "scatter",
+            mode: "lines",
+            line: {color: "pink"}
+        };
+
+        var checkRange = {
+            name: "Index range",
+            x: [],
+            y: [],
+            type: "scatter",
+            mode: "lines",
+            line: {color: "orange"}
+        };
+
+        var dbRange = {
+            name: "Database range",
+            x: [],
+            y: [],
+            type: "scatter",
+            mode: "lines",
+            line: {color: "white"}
         };
         const template = {
             "data": {
@@ -888,7 +932,7 @@
             margin: {l: 0, r: 0, t: 60, b: 0},
         };
 
-        var chart = Plotly.newPlot('live-chart', [priceData, buyData, sellData], layout);
+        var chart = Plotly.newPlot('live-chart', [priceData, buyData, sellData, highestPoint, checkRange, dbRange, lowestPoint, filteredData], layout);
         
         socket.on('connect', function() {
             console.log('Socket.IO connected!');
@@ -904,11 +948,32 @@
         
         socket.on('update_price', function(data) {
             console.log('Received update_price event:', data);
-            try {
-                Plotly.extendTraces('live-chart', {x: [[new Date(data.x)]], y: [[data.y]]}, [0]);
-            } catch (error) {
-                console.error('Error processing update_price event:', error);
+            var num = Math.floor(Math.random() * 2);
+            //if (num === 0) {
+                Plotly.extendTraces('live-chart', {x: [[new Date(data.x)]], y: [[data.y]]}, [0]); 
+            //}
+            
+
+            // DB RANGE
+            dbRange.x = [];
+            dbRange.y = [];
+            
+            if (priceData.y.length > 500) {
+                var db_index = priceData.y.length - 500;
+
+                Plotly.extendTraces('live-chart', {x: [[new Date(priceData.x.at(db_index))]], y: [[priceData.y.at(db_index)]]}, [5]);
+                Plotly.extendTraces('live-chart', {x: [[new Date(data.x)]], y: [[data.y]]}, [5]);                
             }
+        });
+
+        socket.on("filtered_event", function(data) {
+            console.log("Recieved filtered_event event:", data)
+            try {
+                Plotly.extendTraces('live-chart', {x: [[new Date(data.x)]], y: [[data.y]]}, [7]);
+            } catch {
+                console.warn("Error extending traces");
+            }
+            
         });
 
         socket.on('buy_event', function(data) {
@@ -921,9 +986,46 @@
             Plotly.extendTraces('live-chart', {x: [[new Date(data.x)]], y: [[data.y]]}, [2]);
         });
 
-        socket.onAny((event, ...args) => {
-            console.log(`Received event: ${event}`, args);
+        socket.on('high_event', function(data) {
+            console.log('Received high_event event:', data);
+            highestPoint.y = [];
+            highestPoint.x = [];
+            
+            var index = priceData.y.lastIndexOf(data.price);
+            var last_index = priceData.y.length - 1;
+
+            Plotly.extendTraces('live-chart', {x: [[new Date(priceData.x.at(index))]], y: [[priceData.y.at(index)]]}, [3]);
+            Plotly.extendTraces('live-chart', {x: [[new Date(priceData.x.at(last_index))]], y: [[priceData.y.at(last_index)]]}, [3]);
+
+            // INDEX RANGE
+            checkRange.x = [];
+            checkRange.y = [];
+            var range_index = priceData.y.lastIndexOf(data.point);
+            
+            Plotly.extendTraces('live-chart', {x: [[new Date(priceData.x.at(range_index - 240))]], y: [[priceData.y.at(range_index - 240)]]}, [4]);
+            Plotly.extendTraces('live-chart', {x: [[new Date(priceData.x.at(range_index))]], y: [[priceData.y.at(range_index)]]}, [4]);
         });
+
+        socket.on('low_event', function(data) {
+            console.log('Received low_event:', data);
+            lowestPoint.y = [];
+            lowestPoint.x = [];
+            
+            var index = priceData.y.lastIndexOf(data.price);
+            var last_index = priceData.y.length - 1;
+
+            Plotly.extendTraces('live-chart', {x: [[new Date(priceData.x.at(index))]], y: [[priceData.y.at(index)]]}, [6]);
+            Plotly.extendTraces('live-chart', {x: [[new Date(priceData.x.at(last_index))]], y: [[priceData.y.at(last_index)]]}, [6]);
+
+            // INDEX RANGE
+            checkRange.x = [];
+            checkRange.y = [];
+            var range_index = priceData.y.lastIndexOf(data.point);
+            
+            Plotly.extendTraces('live-chart', {x: [[new Date(priceData.x.at(range_index - 240))]], y: [[priceData.y.at(range_index - 240)]]}, [4]);
+            Plotly.extendTraces('live-chart', {x: [[new Date(priceData.x.at(range_index))]], y: [[priceData.y.at(range_index)]]}, [4]);
+        });
+
     </script>
 </body>
 </html>

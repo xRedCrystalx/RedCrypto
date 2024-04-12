@@ -1,9 +1,8 @@
-import sys, typing, ccxt, asyncio, threading
+import sys, typing, ccxt, asyncio, threading, discord
 sys.dont_write_bytecode = True
 from discord.ext import commands
 
 if typing.TYPE_CHECKING:
-    import discord
     from src.discord.bot import DiscordHandler
     from src.crypto.main import CryptoMain
     from src.website.API import MainWebsite
@@ -45,11 +44,14 @@ class SharedResource:
             "precentDB" : [],
             "buy" : {
                 "%" : None,
-                "counter" : 0
+                "price" : 0,
+                "last" : None,
+                "low" : None
             }
         }
         self.transaction_db: list[dict[str, typing.Any]] = []
-        
+        self.saved_transactions: list[dict[str, typing.Any]] = []
+
         # tracking
         self.hourly_tracker: list[dict[str, float | str]] = []
         self.daily_tracker: dict[str, float | int] = {
@@ -63,6 +65,7 @@ class SharedResource:
         # sandbox
         self.WALLET: float = None
         self.CURRENT_MARKET_PRICE: float = 0
+        self.PROFIT: float = 0
 
 shared = SharedResource()
 
